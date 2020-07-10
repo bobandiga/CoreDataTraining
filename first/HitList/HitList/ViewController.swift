@@ -17,7 +17,7 @@ class ViewController: UITableViewController {
         super.viewDidLoad()
         
         title = "List"
-        
+        fetchPeople()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -40,6 +40,7 @@ class ViewController: UITableViewController {
         alertController.addAction(UIAlertAction(title: "Save", style: .default, handler: { [unowned self] (action) in
             guard let tf = alertController.textFields?.first, let text = tf.text else { return }
             self.save(name: text)
+            self.fetchPeople()
             self.tableView.reloadData()
         }))
         present(alertController, animated: true, completion: nil)
@@ -55,6 +56,20 @@ class ViewController: UITableViewController {
         
         do {
             try context.save()
+        } catch let error as NSError {
+            print(error, "   ", error.userInfo)
+        }
+    }
+    
+    fileprivate func fetchPeople() {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let context = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest: NSFetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Person")
+        
+        do {
+            let result = try context.fetch(fetchRequest)
+            people = result
         } catch let error as NSError {
             print(error, "   ", error.userInfo)
         }
